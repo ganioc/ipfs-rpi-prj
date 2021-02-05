@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+source ./lib/functions.sh
+
+mode="install"
+if [ -x "$(command -v ipfs)" ]; then
+  ask ">>> IPFS already installed. " || exit 0
+  mode="update"
+fi
+
+arm_type="? (unknown ARM system)"
+rpi_revision=`sed -rn 's/Revision\s+\:\s+([0-9a-z_\-\s\,\(\)]+)/\1/p' /proc/cpuinfo`
+
+echo $rpi_revision
+
+if [[ $rpi_revision == *"900092"* ]]; then
+  arm_type="Raspberry Pi model zero"
+elif [[ $rpi_revision == *"00"* ]]; then
+  arm_type="Raspberry Pi 1"
+elif [[ $rpi_revision == *"a01041"* || $rpi_revision == *"a21041"* ]]; then
+  arm_type="Raspberry Pi 2"
+elif [[ $rpi_revision == *"a02082"* || $rpi_revision = *"a22082"* ]]; then
+  arm_type="Raspberry Pi 3"
+elif [[ $rpi_revision == *"b03114"*  ]]; then
+  arm_type="Raspberry Pi 4b"
+fi
+
+echo ">>> Starting installation on ARM device compatible with $arm_type"
+
+# Download and install IPFS
+ipfs_arch=${2-"linux-arm"}
+#ipfs_version=$(curl -s https://dist.ipfs.io/go-ipfs/versions | tail -1)
+ipfs_version=${1-$ipfs_version}
+ipfs_version="v${ipfs_version#v}"
+
+ipfs_version=v0.7.0
+
+echo ">>> Installing IPFS version $ipfs_version"
+
+tar_gz_destination=/tmp/go-ipfs_${ipfs_version}_${ipfs_arch}.tar.gz
+#wget "https://dist.ipfs.io/go-ipfs/${ipfs_version}/go-ipfs_${ipfs_version}_${ipfs_arch}.tar.gz" \
+#  -q --show-progress \
+#  -O $tar_gz_destination
+
+# Yang
+tar_gz_destination=/tmp/go-ipfs_${ipfs_version}_${ipfs_arch}.tar.gz
+
+echo "To downloaded " $tar_gz_destination
+
+if [ ! -f $tar_gz_destination ]; then
+  echo ">>> Failed to download IPFS"
+  exit 1
+fi
+
+ipfs_destination=/usr/local/bin/ipfs
+tar xzf $tar_gz_destination -C /tmp
+sudo install /tmp/go-ipfs/ipfs $ipfs_destination
+
+echo ">>> Installed IPFS"
+
+

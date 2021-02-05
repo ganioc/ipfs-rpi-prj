@@ -1,5 +1,17 @@
 # IPFS RPi
 
+
+Copy from https://github.com/claudiobizzotto/ipfs-rpi/
+
+I can not vist ipfs.io
+So I just download the *.tar.gz file to local in Web Browser. Then install it ...
+
+./installx
+
+./runx
+
+
+
 A bare bones [IPFS](https://ipfs.io) installer for the Raspberry Pi and other ARM-based devices.
 
 ## Installation
